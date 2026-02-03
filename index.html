@@ -6,103 +6,225 @@
   <title>NOS-GOLD Music Generator</title>
   <style>
     :root { color-scheme: dark; }
-    body { font-family: system-ui, sans-serif; padding: 24px; background:#0b0d10; color:#e8e8e8; }
-    h1 { margin: 0 0 10px; font-size: 28px; letter-spacing: 0.5px; }
-    .top { display:flex; gap:18px; flex-wrap:wrap; align-items:flex-start; }
-    .panel { background:#0f141c; border:1px solid #1b2330; border-radius:16px; padding:14px 16px; box-shadow: 0 8px 22px rgba(0,0,0,.25); }
-    button { font-size: 16px; padding: 10px 14px; border-radius: 12px; border: 0; cursor: pointer; background:#e8e8e8; color:#0b0d10; }
-    button:disabled { opacity:.6; cursor:not-allowed; }
-    .row { margin-top: 10px; display:grid; grid-template-columns: 110px 260px 64px; gap:10px; align-items:center;}
-    label { opacity:.9; }
-    input[type="range"]{ width:260px; }
-    .hint { opacity:.75; margin-top: 10px; line-height:1.4; font-size: 13px;}
-    canvas { width: 420px; height: 420px; border-radius: 16px; border:1px solid #1b2330; background:#000; }
-    .btns { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    .small { font-size: 12px; opacity:.8; }
+    body{
+      margin:0; padding:18px;
+      background: radial-gradient(1200px 800px at 20% 10%, #101a2a 0%, #07080c 55%, #05060a 100%);
+      color:#eaeaea;
+      font-family: "Papyrus","Comic Sans MS","Brush Script MT",cursive;
+      letter-spacing: .2px;
+      text-shadow: 0 0 12px rgba(120,180,255,.16), 0 0 2px rgba(255,255,255,.12);
+      user-select:none;
+    }
+    h1{
+      margin: 0 0 10px;
+      font-size: 30px;
+      letter-spacing: 1px;
+      filter: drop-shadow(0 0 12px rgba(170,90,255,.24));
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 440px 1fr;
+      gap:16px;
+      align-items:start;
+    }
+    .panel{
+      background: rgba(10,14,22,.75);
+      border: 1px solid rgba(120,170,255,.18);
+      border-radius: 18px;
+      box-shadow: 0 12px 34px rgba(0,0,0,.35);
+      padding: 12px 12px;
+      backdrop-filter: blur(8px);
+    }
+    canvas{
+      width: min(62vh, 720px);
+      height: min(62vh, 720px);
+      border-radius: 18px;
+      border: 1px solid rgba(120,170,255,.18);
+      background:#000;
+      box-shadow: 0 16px 46px rgba(0,0,0,.45);
+      display:block;
+    }
+    .btns{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:10px;}
+    button{
+      border:0;
+      border-radius: 14px;
+      padding: 10px 14px;
+      background: linear-gradient(180deg, rgba(240,240,255,.92), rgba(200,210,255,.88));
+      color:#07080c;
+      cursor:pointer;
+      box-shadow: 0 10px 26px rgba(0,0,0,.26);
+      font-family: inherit;
+      font-size: 16px;
+    }
+    button:disabled{ opacity:.6; cursor:not-allowed; }
+    select{
+      width: 100%;
+      border-radius: 12px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(200,220,255,.18);
+      color:#eaeaea;
+      padding: 8px 10px;
+      font-family: inherit;
+      outline: none;
+    }
+    .controls{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px 12px;
+    }
+    .groupTitle{
+      grid-column: 1 / -1;
+      margin-top: 10px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(200,220,255,.12);
+      font-size: 15px;
+      letter-spacing: .6px;
+    }
+    .row{
+      display:grid;
+      grid-template-columns: 120px 1fr 56px;
+      gap: 8px;
+      align-items:center;
+    }
+    .row label{ opacity:.95; }
+    input[type="range"]{
+      width:100%;
+      accent-color: #a7d1ff;
+    }
+    .v{ text-align:right; opacity:.9; }
+    .checks{
+      grid-column: 1 / -1;
+      display:flex; flex-wrap:wrap; gap:10px 14px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(200,220,255,.12);
+    }
+    .checks label{
+      display:flex; gap:8px; align-items:center;
+      opacity:.95;
+    }
+    input[type="checkbox"]{
+      width: 16px; height: 16px;
+      accent-color:#c8a6ff;
+    }
+    .fractalTop{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-bottom:10px;
+    }
   </style>
 </head>
 <body>
   <h1>NOS-GOLD Music Generator</h1>
 
-  <div class="top">
+  <div class="grid">
     <div class="panel">
       <div class="btns">
         <button id="start">Start</button>
         <button id="stop" disabled>Stop</button>
-        <span class="small">Sliders update live while playing.</span>
+        <button id="regen">Regen Phrase</button>
       </div>
 
-      <div class="row">
-        <label for="tempo">Tempo</label>
-        <input id="tempo" type="range" min="60" max="98" value="78"/>
-        <div id="tempoVal">78</div>
-      </div>
+      <div class="controls">
 
-      <div class="row">
-        <label for="lofi">Lo-fi</label>
-        <input id="lofi" type="range" min="0" max="1" step="0.01" value="0.65"/>
-        <div id="lofiVal">0.65</div>
-      </div>
+        <div class="groupTitle">Master</div>
 
-      <div class="row">
-        <label for="dens">Density</label>
-        <input id="dens" type="range" min="0" max="1" step="0.01" value="0.55"/>
-        <div id="densVal">0.55</div>
-      </div>
+        <div class="row"><label>Tempo</label><input id="tempo" type="range" min="55" max="140" value="86"><div class="v" id="tempoV"></div></div>
+        <div class="row"><label>Master</label><input id="master" type="range" min="0" max="1" step="0.01" value="0.85"><div class="v" id="masterV"></div></div>
+        <div class="row"><label>Swing</label><input id="swing" type="range" min="0" max="1" step="0.01" value="0.35"><div class="v" id="swingV"></div></div>
+        <div class="row"><label>Density</label><input id="dens" type="range" min="0" max="1" step="0.01" value="0.65"><div class="v" id="densV"></div></div>
 
-      <div class="row">
-        <label for="bassVar">Bass Rand</label>
-        <input id="bassVar" type="range" min="0" max="1" step="0.01" value="0.35"/>
-        <div id="bassVarVal">0.35</div>
-      </div>
+        <div class="row"><label>Bass</label><input id="bass" type="range" min="-12" max="12" step="0.1" value="2.0"><div class="v" id="bassV"></div></div>
+        <div class="row"><label>Treble</label><input id="treble" type="range" min="-12" max="12" step="0.1" value="-1.0"><div class="v" id="trebleV"></div></div>
 
-      <div class="row">
-        <label for="trebleVar">Treble Rand</label>
-        <input id="trebleVar" type="range" min="0" max="1" step="0.01" value="0.45"/>
-        <div id="trebleVarVal">0.45</div>
-      </div>
+        <div class="row"><label>Lo-Fi</label><input id="lofi" type="range" min="0" max="1" step="0.01" value="0.35"><div class="v" id="lofiV"></div></div>
+        <div class="row"><label>Stereo</label><input id="stereo" type="range" min="0" max="1" step="0.01" value="0.55"><div class="v" id="stereoV"></div></div>
 
-      <!-- three extra effects sliders -->
-      <div class="row">
-        <label for="fxDelay">Delay</label>
-        <input id="fxDelay" type="range" min="0" max="1" step="0.01" value="0.35"/>
-        <div id="fxDelayVal">0.35</div>
-      </div>
+        <div class="groupTitle">FX</div>
 
-      <div class="row">
-        <label for="fxReverb">Reverb</label>
-        <input id="fxReverb" type="range" min="0" max="1" step="0.01" value="0.25"/>
-        <div id="fxReverbVal">0.25</div>
-      </div>
+        <div class="row"><label>Delay</label><input id="fxDelay" type="range" min="0" max="1" step="0.01" value="0.40"><div class="v" id="fxDelayV"></div></div>
+        <div class="row"><label>Reverb</label><input id="fxReverb" type="range" min="0" max="1" step="0.01" value="0.30"><div class="v" id="fxReverbV"></div></div>
+        <div class="row"><label>Chorus</label><input id="fxChorus" type="range" min="0" max="1" step="0.01" value="0.25"><div class="v" id="fxChorusV"></div></div>
+        <div class="row"><label>Drive</label><input id="fxDrive" type="range" min="0" max="1" step="0.01" value="0.18"><div class="v" id="fxDriveV"></div></div>
 
-      <div class="row">
-        <label for="fxChorus">Chorus</label>
-        <input id="fxChorus" type="range" min="0" max="1" step="0.01" value="0.30"/>
-        <div id="fxChorusVal">0.30</div>
-      </div>
+        <div class="row"><label>Wub Rate</label><input id="wubRate" type="range" min="0.2" max="12" step="0.01" value="2.8"><div class="v" id="wubRateV"></div></div>
+        <div class="row"><label>Wub Depth</label><input id="wubDepth" type="range" min="0" max="1" step="0.01" value="0.55"><div class="v" id="wubDepthV"></div></div>
 
-      <div class="hint">
-        WebAudio needs a user gesture to start. Leave it running; harmony + timbre drift slowly.
-        The fractal’s parameters are driven by the same evolving music variables.
+        <div class="groupTitle">Phrase + Key</div>
+
+        <div class="row"><label>Mutate</label><input id="mutate" type="range" min="0" max="1" step="0.01" value="0.55"><div class="v" id="mutateV"></div></div>
+        <div class="row"><label>Key Drift</label><input id="keyDrift" type="range" min="0" max="1" step="0.01" value="0.55"><div class="v" id="keyDriftV"></div></div>
+        <div class="row"><label>Phrase Len</label><input id="phraseLen" type="range" min="4" max="16" step="1" value="8"><div class="v" id="phraseLenV"></div></div>
+        <div class="row"><label>Lead Busy</label><input id="leadBusy" type="range" min="0" max="1" step="0.01" value="0.55"><div class="v" id="leadBusyV"></div></div>
+
+        <div class="groupTitle">Instrument Mix</div>
+
+        <div class="row"><label>Drums</label><input id="mixDrums" type="range" min="0" max="1" step="0.01" value="0.85"><div class="v" id="mixDrumsV"></div></div>
+        <div class="row"><label>Kick</label><input id="mixKick" type="range" min="0" max="1" step="0.01" value="0.95"><div class="v" id="mixKickV"></div></div>
+        <div class="row"><label>Snare</label><input id="mixSnare" type="range" min="0" max="1" step="0.01" value="0.62"><div class="v" id="mixSnareV"></div></div>
+        <div class="row"><label>Hats</label><input id="mixHats" type="range" min="0" max="1" step="0.01" value="0.32"><div class="v" id="mixHatsV"></div></div>
+
+        <div class="row"><label>Chords</label><input id="mixChords" type="range" min="0" max="1" step="0.01" value="0.60"><div class="v" id="mixChordsV"></div></div>
+        <div class="row"><label>Bass</label><input id="mixBass" type="range" min="0" max="1" step="0.01" value="0.70"><div class="v" id="mixBassV"></div></div>
+        <div class="row"><label>Lead</label><input id="mixLead" type="range" min="0" max="1" step="0.01" value="0.35"><div class="v" id="mixLeadV"></div></div>
+        <div class="row"><label>Noise</label><input id="mixNoise" type="range" min="0" max="1" step="0.01" value="0.18"><div class="v" id="mixNoiseV"></div></div>
+
+        <div class="checks">
+          <label><input id="enDrums" type="checkbox" checked>Drums</label>
+          <label><input id="enChords" type="checkbox" checked>Chords</label>
+          <label><input id="enBass" type="checkbox" checked>Bass</label>
+          <label><input id="enLead" type="checkbox" checked>Lead</label>
+          <label><input id="autoKey" type="checkbox" checked>Auto Key</label>
+          <label><input id="autoPhrase" type="checkbox" checked>Auto Phrase</label>
+          <label><input id="grime" type="checkbox">Grime</label>
+          <label><input id="wub" type="checkbox">Wub</label>
+        </div>
+
+        <div class="groupTitle">Fractals</div>
+
+        <div class="fractalTop" style="grid-column:1/-1;">
+          <div>
+            <select id="fractalType">
+              <option value="mandelbrot">Mandelbrot</option>
+              <option value="julia">Julia</option>
+              <option value="burning_ship">Burning Ship</option>
+              <option value="tricorn">Tricorn</option>
+              <option value="multibrot3">Multibrot (p=3)</option>
+              <option value="multibrot4">Multibrot (p=4)</option>
+              <option value="newton3">Newton (z^3-1)</option>
+              <option value="phoenix">Phoenix</option>
+              <option value="celtic">Celtic</option>
+              <option value="spider">Spider</option>
+            </select>
+          </div>
+          <div class="checks" style="margin:0;">
+            <label><input id="autoFractal" type="checkbox">Randomize every 30s</label>
+            <label><input id="hiRes" type="checkbox">Hi-Res</label>
+          </div>
+        </div>
+
       </div>
     </div>
 
     <div class="panel">
-      <canvas id="fractal" width="360" height="360"></canvas>
-      <div class="hint">Julia fractal (live). It “breathes” with lo-fi, density, wow/flutter, bass/treble randomness, and FX.</div>
+      <canvas id="fractal" width="720" height="720"></canvas>
     </div>
   </div>
 
 <script>
 (() => {
-  // ---------- utilities ----------
+  // ---------- utils ----------
   const clamp = (x,a,b)=>Math.max(a,Math.min(b,x));
   const lerp  = (a,b,t)=>a+(b-a)*t;
   const rnd   = (a=1,b=0)=>Math.random()*(a-b)+b;
   const choose= (arr)=>arr[(Math.random()*arr.length)|0];
   const mtof  = (m)=>440*Math.pow(2,(m-69)/12);
+  const nowMs = ()=>performance.now();
 
-  // smooth random walk
   function smoothWander(state, step=0.01, pull=0.002) {
     state.dv += rnd(step, -step) - state.v*pull;
     state.dv *= 0.995;
@@ -110,64 +232,607 @@
     return state.v;
   }
 
-  // ---------- audio graph ----------
-  let ac, master, isRunning=false, timer=null;
+  // ---------- UI binding ----------
+  const UI = {};
+  function bindRange(id, key, fmt=(v)=>v.toFixed(2)) {
+    const el = document.getElementById(id);
+    const out = document.getElementById(id+"V");
+    UI[id]=el;
+    const set = () => { S[key]=+el.value; if(out) out.textContent = fmt(+el.value); };
+    el.addEventListener("input", set);
+    set();
+  }
+  function bindCheck(id, key) {
+    const el = document.getElementById(id);
+    UI[id]=el;
+    const set = () => { S[key]=!!el.checked; };
+    el.addEventListener("change", set);
+    set();
+  }
+  function bindSelect(id, key) {
+    const el = document.getElementById(id);
+    UI[id]=el;
+    const set = () => { S[key]=el.value; };
+    el.addEventListener("change", set);
+    set();
+  }
 
-  // tweakable nodes
-  let masterLP, masterHP, masterComp, masterSat;
-  let noiseGain;
-  let lofiMix;
-  let tapeDelay, tapeFB, delaySend;
-  let tapeWowLFO, tapeWowGain, tapeFlutterLFO, tapeFlutterGain;
-  let bitCrusher;
+  // ---------- state ----------
+  const S = {
+    bpm: 86, master:0.85, swing:0.35, density:0.65,
+    bassEQ: 2.0, trebleEQ:-1.0,
+    lofi:0.35, stereo:0.55,
+    fxDelay:0.40, fxReverb:0.30, fxChorus:0.25, fxDrive:0.18,
+    wubRate:2.8, wubDepth:0.55,
+    mutate:0.55, keyDrift:0.55, phraseLen:8, leadBusy:0.55,
+    mixDrums:0.85, mixKick:0.95, mixSnare:0.62, mixHats:0.32,
+    mixChords:0.60, mixBass:0.70, mixLead:0.35, mixNoise:0.18,
+    enDrums:true, enChords:true, enBass:true, enLead:true,
+    autoKey:true, autoPhrase:true, grime:false, wub:false,
+    fractalType:"mandelbrot", autoFractal:false, hiRes:false,
 
-  // reverb
-  let convolver, reverbSend, reverbGain;
-
-  // chorus
-  let chorusDelay, chorusLFO, chorusDepth, chorusMix;
-
-  // buses
-  let drumBus, musicBus;
-  let kickGain, snareGain, hatGain;
-  let chordBus, bassBus, leadBus;
-
-  // ---------- musical state ----------
-  const state = {
-    bpm: 78,
-    lofi: 0.65,
-    density: 0.55,
-    bassVar: 0.35,
-    trebleVar: 0.45,
-    fxDelay: 0.35,
-    fxReverb: 0.25,
-    fxChorus: 0.30,
-
-    keyRoot: 57,
+    // musical
+    keyRoot: 57, // A3
     mode: "minor",
-    bar: 0,
-    step: 0,
-    nextTime: 0,
+    bar: 0, step: 0, nextTime: 0,
+    drift:{v:0,dv:0}, bright:{v:0,dv:0}, wow:{v:0,dv:0}, flutter:{v:0,dv:0}, swingW:{v:0,dv:0},
 
-    drift:   { v: 0, dv: 0 },
-    bright:  { v: 0, dv: 0 },
-    wow:     { v: 0, dv: 0 },
-    flutter: { v: 0, dv: 0 },
-    swing:   { v: 0, dv: 0 },
-
-    prog:    [0, 5, 3, 6],
-    progAlt: [0, 3, 4, 5],
+    // phrase
+    phrase: [],
+    phraseIdx: 0,
+    phraseLastChangeBar: 0,
+    prog: [0,5,3,6],
+    progAlt: [0,3,4,5],
     useAlt: false,
   };
 
-  function secondsPerBeat(){ return 60/state.bpm; }
+  // ---------- WebAudio graph ----------
+  let ac=null, running=false, timer=null;
+  let masterG, masterComp, masterSat, masterHP, masterLP;
+  let stereoWidenerL, stereoWidenerR, stereoMerger;
+  let bassEQ, trebleEQ;
+  let drumBus, musicBus, preMaster;
+  let drumsMixG, musicMixG;
+
+  // FX
+  let delayNode, delaySendG, delayFBG;
+  let revConvolver, revSendG, revWetG;
+  let chorusDelay, chorusLFO, chorusDepthG, chorusWetG;
+  let noiseGain, noiseSrc;
+  let wubLFO, wubDepthG;
+  let grimeDrive;
+
+  // Instrument submix
+  let kickG, snareG, hatsG, chordsG, bassG, leadG;
+
+  function makeSaturationCurve(amount=0.5) {
+    const n = 44100;
+    const curve = new Float32Array(n);
+    const k = clamp(amount,0,1)*18 + 1;
+    for (let i=0;i<n;i++){
+      const x = (i*2/n)-1;
+      curve[i] = Math.tanh(k*x)/Math.tanh(k);
+    }
+    return curve;
+  }
+
+  function makeImpulseResponse(seconds=2.1, decay=2.5) {
+    const rate = ac.sampleRate;
+    const len = Math.floor(rate * seconds);
+    const ir = ac.createBuffer(2, len, rate);
+    for (let ch=0; ch<2; ch++){
+      const d = ir.getChannelData(ch);
+      for (let i=0;i<len;i++){
+        const t = i/len;
+        const pinkish = (Math.random()*2-1) * (0.55 + 0.45*(1-t));
+        d[i] = pinkish * Math.pow(1-t, decay);
+      }
+    }
+    return ir;
+  }
+
+  function makeNoiseSrc() {
+    const bufferSize = 2 * ac.sampleRate;
+    const buffer = ac.createBuffer(1, bufferSize, ac.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i=0;i<bufferSize;i++){
+      // slightly colored vinyl-ish noise base
+      const w = Math.random()*2-1;
+      data[i] = w * 0.22;
+    }
+    const src = ac.createBufferSource();
+    src.buffer = buffer;
+    src.loop = true;
+    src.start();
+    return src;
+  }
+
+  function ensureAudio() {
+    if (ac) return;
+    ac = new (window.AudioContext || window.webkitAudioContext)();
+
+    // basic buses
+    drumBus = ac.createGain();
+    musicBus = ac.createGain();
+    drumsMixG = ac.createGain();
+    musicMixG = ac.createGain();
+    drumBus.connect(drumsMixG);
+    musicBus.connect(musicMixG);
+
+    // stereo widening (simple mid/side-ish)
+    stereoMerger = ac.createChannelMerger(2);
+    stereoWidenerL = ac.createGain();
+    stereoWidenerR = ac.createGain();
+
+    // route mono sum -> split
+    const sumToStereo = ac.createGain();
+    sumToStereo.gain.value = 1.0;
+    drumsMixG.connect(sumToStereo);
+    musicMixG.connect(sumToStereo);
+
+    // create two branches with subtle decorrelation via modulated delay (cheap)
+    const dl = ac.createDelay(0.03); dl.delayTime.value = 0.006;
+    const dr = ac.createDelay(0.03); dr.delayTime.value = 0.011;
+    sumToStereo.connect(dl);
+    sumToStereo.connect(dr);
+    dl.connect(stereoWidenerL);
+    dr.connect(stereoWidenerR);
+    stereoWidenerL.connect(stereoMerger, 0, 0);
+    stereoWidenerR.connect(stereoMerger, 0, 1);
+
+    preMaster = ac.createGain();
+
+    // EQ
+    bassEQ = ac.createBiquadFilter();
+    bassEQ.type = "lowshelf";
+    bassEQ.frequency.value = 120;
+    bassEQ.gain.value = S.bassEQ;
+
+    trebleEQ = ac.createBiquadFilter();
+    trebleEQ.type = "highshelf";
+    trebleEQ.frequency.value = 5200;
+    trebleEQ.gain.value = S.trebleEQ;
+
+    // master filters + comp + sat
+    masterHP = ac.createBiquadFilter();
+    masterHP.type = "highpass";
+    masterHP.frequency.value = 28;
+
+    masterLP = ac.createBiquadFilter();
+    masterLP.type = "lowpass";
+    masterLP.frequency.value = 16000;
+    masterLP.Q.value = 0.55;
+
+    masterSat = ac.createWaveShaper();
+    masterSat.curve = makeSaturationCurve(0.35);
+    masterSat.oversample = "2x";
+
+    masterComp = ac.createDynamicsCompressor();
+    masterComp.threshold.value = -16;
+    masterComp.knee.value = 24;
+    masterComp.ratio.value = 3.0;
+    masterComp.attack.value = 0.01;
+    masterComp.release.value = 0.22;
+
+    grimeDrive = ac.createWaveShaper();
+    grimeDrive.curve = makeSaturationCurve(0.75);
+    grimeDrive.oversample = "4x";
+
+    // FX: delay
+    delayNode = ac.createDelay(1.0);
+    delayNode.delayTime.value = 0.28;
+    delayFBG = ac.createGain();
+    delayFBG.gain.value = 0.22;
+    delaySendG = ac.createGain();
+    delaySendG.gain.value = 0.18;
+    delayNode.connect(delayFBG);
+    delayFBG.connect(delayNode);
+
+    // FX: reverb
+    revConvolver = ac.createConvolver();
+    revConvolver.buffer = makeImpulseResponse(2.0, 2.6);
+    revSendG = ac.createGain(); revSendG.gain.value = 0.18;
+    revWetG = ac.createGain(); revWetG.gain.value = 0.30;
+
+    // FX: chorus
+    chorusDelay = ac.createDelay(0.05);
+    chorusDelay.delayTime.value = 0.016;
+    chorusLFO = ac.createOscillator(); chorusLFO.type="sine"; chorusLFO.frequency.value = 0.22;
+    chorusDepthG = ac.createGain(); chorusDepthG.gain.value = 0.004;
+    chorusWetG = ac.createGain(); chorusWetG.gain.value = 0.18;
+    chorusLFO.connect(chorusDepthG);
+    chorusDepthG.connect(chorusDelay.delayTime);
+    chorusLFO.start();
+
+    // noise
+    noiseSrc = makeNoiseSrc();
+    noiseGain = ac.createGain(); noiseGain.gain.value = 0.015;
+    const noiseHP = ac.createBiquadFilter(); noiseHP.type="highpass"; noiseHP.frequency.value=160;
+    const noiseLP = ac.createBiquadFilter(); noiseLP.type="lowpass"; noiseLP.frequency.value=5200;
+    noiseSrc.connect(noiseHP); noiseHP.connect(noiseLP); noiseLP.connect(noiseGain);
+
+    // wub LFO (applied to bass filter cutoff)
+    wubLFO = ac.createOscillator(); wubLFO.type="sine"; wubLFO.frequency.value = S.wubRate;
+    wubDepthG = ac.createGain(); wubDepthG.gain.value = 0.0;
+    wubLFO.connect(wubDepthG);
+    wubLFO.start();
+
+    // master
+    masterG = ac.createGain();
+    masterG.gain.value = S.master;
+
+    // Routing: stereo -> preMaster -> EQ -> FX sums -> master chain
+    stereoMerger.connect(preMaster);
+
+    // FX sends from preMaster
+    preMaster.connect(delaySendG); delaySendG.connect(delayNode);
+    preMaster.connect(revSendG);   revSendG.connect(revConvolver);
+    preMaster.connect(chorusDelay);
+    chorusDelay.connect(chorusWetG);
+
+    // FX returns + dry
+    delayNode.connect(preMaster); // feed back into the preMaster tone chain (lo-fi-ish)
+    revConvolver.connect(revWetG);
+    revWetG.connect(preMaster);
+    chorusWetG.connect(preMaster);
+    noiseGain.connect(preMaster);
+
+    // preMaster tone chain
+    preMaster.connect(bassEQ);
+    bassEQ.connect(trebleEQ);
+
+    // optional grime stage
+    trebleEQ.connect(grimeDrive);
+
+    grimeDrive.connect(masterHP);
+    masterHP.connect(masterLP);
+    masterLP.connect(masterSat);
+    masterSat.connect(masterComp);
+    masterComp.connect(masterG);
+    masterG.connect(ac.destination);
+
+    // instrument gains
+    kickG = ac.createGain();  kickG.gain.value = 0.95;
+    snareG = ac.createGain(); snareG.gain.value = 0.62;
+    hatsG = ac.createGain();  hatsG.gain.value = 0.32;
+    chordsG = ac.createGain(); chordsG.gain.value = 0.60;
+    bassG = ac.createGain();   bassG.gain.value = 0.70;
+    leadG = ac.createGain();   leadG.gain.value = 0.35;
+
+    // connect to buses
+    kickG.connect(drumBus);
+    snareG.connect(drumBus);
+    hatsG.connect(drumBus);
+    chordsG.connect(musicBus);
+    bassG.connect(musicBus);
+    leadG.connect(musicBus);
+  }
+
+  // ---------- instrument synthesis (more "realistic-ish") ----------
+  let clickBuf=null, snareBuf=null, hatBuf=null, clapBuf=null;
+
+  function makeClickBuffer() {
+    if (clickBuf) return clickBuf;
+    const len = 256;
+    clickBuf = ac.createBuffer(1, len, ac.sampleRate);
+    const d = clickBuf.getChannelData(0);
+    for (let i=0;i<len;i++){
+      const t = i/len;
+      d[i] = (Math.random()*2-1) * Math.pow(1-t, 6);
+    }
+    return clickBuf;
+  }
+
+  function makeSnareNoise() {
+    if (snareBuf) return snareBuf;
+    const len = (ac.sampleRate*0.35)|0;
+    snareBuf = ac.createBuffer(1, len, ac.sampleRate);
+    const d = snareBuf.getChannelData(0);
+    for (let i=0;i<len;i++){
+      const t = i/len;
+      // noisy burst with body
+      d[i] = (Math.random()*2-1) * Math.pow(1-t, 3.2);
+    }
+    return snareBuf;
+  }
+
+  function makeHatNoise() {
+    if (hatBuf) return hatBuf;
+    const len = (ac.sampleRate*0.22)|0;
+    hatBuf = ac.createBuffer(1, len, ac.sampleRate);
+    const d = hatBuf.getChannelData(0);
+    for (let i=0;i<len;i++){
+      const t = i/len;
+      const w = Math.random()*2-1;
+      d[i] = w * Math.pow(1-t, 5.0);
+    }
+    return hatBuf;
+  }
+
+  function makeClapNoise() {
+    if (clapBuf) return clapBuf;
+    const len = (ac.sampleRate*0.25)|0;
+    clapBuf = ac.createBuffer(1, len, ac.sampleRate);
+    const d = clapBuf.getChannelData(0);
+    for (let i=0;i<len;i++){
+      const t = i/len;
+      // three little bursts
+      const burst = (t<0.10?1:0) + (t>0.12 && t<0.22?0.9:0) + (t>0.24 && t<0.42?0.7:0);
+      d[i] = (Math.random()*2-1) * burst * Math.pow(1-t, 2.6);
+    }
+    return clapBuf;
+  }
+
+  function envGain(t0, atk, dec, sus, rel, t1) {
+    const g = ac.createGain();
+    const eps = 0.0001;
+    g.gain.setValueAtTime(eps, t0);
+    g.gain.exponentialRampToValueAtTime(1.0, t0+atk);
+    g.gain.exponentialRampToValueAtTime(Math.max(eps, sus), t0+atk+dec);
+    g.gain.setValueAtTime(Math.max(eps, sus), t1);
+    g.gain.exponentialRampToValueAtTime(eps, t1+rel);
+    return g;
+  }
+
+  function panNode(amount) {
+    const p = ac.createStereoPanner();
+    p.pan.value = amount;
+    return p;
+  }
+
+  function playKick(t, v=1) {
+    if (!S.enDrums) return;
+
+    // body: sine sweep + tiny FM click
+    const o = ac.createOscillator();
+    o.type = "sine";
+    const g = ac.createGain();
+    const p = panNode(rnd(0.08,-0.08)*S.stereo);
+
+    const f0 = lerp(155, 190, rnd()) * lerp(1.0, 0.92, S.lofi);
+    o.frequency.setValueAtTime(f0, t);
+    o.frequency.exponentialRampToValueAtTime(52, t + 0.11);
+
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(1.0*v, t+0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, t+0.32);
+
+    // click layer
+    const click = ac.createBufferSource();
+    click.buffer = makeClickBuffer();
+    const cg = ac.createGain();
+    cg.gain.setValueAtTime(0.22*v, t);
+    cg.gain.exponentialRampToValueAtTime(0.0001, t+0.03);
+
+    // soft transient shaper
+    const ws = ac.createWaveShaper();
+    ws.curve = makeSaturationCurve(lerp(0.18, 0.55, S.fxDrive));
+
+    o.connect(g); g.connect(ws); ws.connect(p); p.connect(kickG);
+    click.connect(cg); cg.connect(p);
+
+    o.start(t); o.stop(t+0.5);
+    click.start(t); click.stop(t+0.05);
+  }
+
+  function playSnare(t, v=1) {
+    if (!S.enDrums) return;
+
+    // noise burst
+    const n = ac.createBufferSource();
+    n.buffer = makeSnareNoise();
+
+    const bp = ac.createBiquadFilter();
+    bp.type="bandpass";
+    bp.frequency.value = lerp(1700, 2600, rnd());
+    bp.Q.value = 0.7;
+
+    const hp = ac.createBiquadFilter();
+    hp.type="highpass";
+    hp.frequency.value = 500;
+
+    const ng = ac.createGain();
+    ng.gain.setValueAtTime(0.0001, t);
+    ng.gain.exponentialRampToValueAtTime(0.9*v, t+0.006);
+    ng.gain.exponentialRampToValueAtTime(0.0001, t+0.22);
+
+    // tone body
+    const o = ac.createOscillator();
+    o.type = "triangle";
+    o.frequency.setValueAtTime(190 + rnd(30,-30), t);
+    const og = ac.createGain();
+    og.gain.setValueAtTime(0.0001, t);
+    og.gain.exponentialRampToValueAtTime(0.45*v, t+0.003);
+    og.gain.exponentialRampToValueAtTime(0.0001, t+0.12);
+
+    // clap layer sometimes
+    if (Math.random() < 0.35 + 0.25*S.density) {
+      const c = ac.createBufferSource();
+      c.buffer = makeClapNoise();
+      const chp = ac.createBiquadFilter(); chp.type="highpass"; chp.frequency.value = 800;
+      const cg = ac.createGain();
+      cg.gain.setValueAtTime(0.0001, t);
+      cg.gain.exponentialRampToValueAtTime(0.40*v, t+0.004);
+      cg.gain.exponentialRampToValueAtTime(0.0001, t+0.24);
+      c.connect(chp); chp.connect(cg); cg.connect(snareG);
+      c.start(t); c.stop(t+0.30);
+    }
+
+    const p = panNode(rnd(0.10,-0.10)*S.stereo);
+
+    n.connect(bp); bp.connect(hp); hp.connect(ng);
+    o.connect(og);
+
+    const ws = ac.createWaveShaper();
+    ws.curve = makeSaturationCurve(lerp(0.15, 0.60, S.fxDrive));
+
+    ng.connect(ws); og.connect(ws);
+    ws.connect(p); p.connect(snareG);
+
+    n.start(t); n.stop(t+0.30);
+    o.start(t); o.stop(t+0.16);
+  }
+
+  function playHat(t, open=0.06, v=1) {
+    if (!S.enDrums) return;
+
+    const n = ac.createBufferSource();
+    n.buffer = makeHatNoise();
+
+    const hp = ac.createBiquadFilter();
+    hp.type="highpass";
+    hp.frequency.value = lerp(6200, 8800, rnd());
+    hp.Q.value = 0.3;
+
+    const bp = ac.createBiquadFilter();
+    bp.type="bandpass";
+    bp.frequency.value = lerp(8200, 11500, rnd());
+    bp.Q.value = 0.8;
+
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.35*v, t+0.0015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t+open);
+
+    const p = panNode(rnd(0.45,-0.45)*S.stereo);
+
+    n.connect(hp); hp.connect(bp); bp.connect(g);
+    g.connect(p); p.connect(hatsG);
+
+    n.start(t); n.stop(t+open+0.03);
+  }
+
+  function playChord(t0, dur, chordMidi, brightness=0.5, v=1) {
+    if (!S.enChords) return;
+
+    const out = ac.createGain();
+    out.gain.value = v;
+
+    // "more realistic" pad: triangle + sine + slight detune + LPF + gentle amplitude movement
+    const lp = ac.createBiquadFilter();
+    lp.type="lowpass";
+    const baseLP = lerp(900, 6200, brightness) * lerp(0.8, 1.1, 1-S.lofi);
+    lp.frequency.setValueAtTime(baseLP, t0);
+    lp.Q.value = 0.65;
+
+    const p = panNode(rnd(0.25,-0.25)*S.stereo);
+
+    out.connect(lp); lp.connect(p); p.connect(chordsG);
+
+    chordMidi.forEach((m, i) => {
+      const o1 = ac.createOscillator(); o1.type="triangle";
+      const o2 = ac.createOscillator(); o2.type="sine";
+      const det = (i-1.5)*rnd(7,4) + rnd(2,-2);
+      o1.detune.value = det;
+      o2.detune.value = det*0.35;
+
+      const f = mtof(m);
+      o1.frequency.setValueAtTime(f, t0);
+      o2.frequency.setValueAtTime(f*0.5, t0); // sub-overtone for warmth
+
+      const g = envGain(t0, 0.08, 0.35, 0.18, 0.35, t0+dur);
+      const g2 = envGain(t0, 0.12, 0.45, 0.12, 0.35, t0+dur);
+
+      const mix1 = ac.createGain(); mix1.gain.value = 0.85;
+      const mix2 = ac.createGain(); mix2.gain.value = 0.35;
+
+      o1.connect(g); g.connect(mix1);
+      o2.connect(g2); g2.connect(mix2);
+      mix1.connect(out); mix2.connect(out);
+
+      o1.start(t0); o2.start(t0);
+      o1.stop(t0+dur+1.0); o2.stop(t0+dur+1.0);
+    });
+  }
+
+  function playBass(t0, dur, midi, v=1, wobble=false) {
+    if (!S.enBass) return;
+
+    // wavetable-ish: saw + square mixed, filtered, driven
+    const o1 = ac.createOscillator(); o1.type="sawtooth";
+    const o2 = ac.createOscillator(); o2.type="square";
+    const f = mtof(midi);
+    o1.frequency.setValueAtTime(f, t0);
+    o2.frequency.setValueAtTime(f*0.5, t0);
+
+    // filter with optional wub modulation
+    const lp = ac.createBiquadFilter();
+    lp.type="lowpass";
+    lp.Q.value = lerp(0.9, 2.4, S.wubDepth);
+    const base = lerp(140, 680, 1-S.lofi) * lerp(0.85, 1.25, 0.5 + 0.8*S.density);
+    lp.frequency.setValueAtTime(base, t0);
+
+    // connect wobble modulation
+    if (wobble && S.wub) {
+      // LFO -> depth gain -> filter freq
+      wubDepthG.connect(lp.frequency);
+    }
+
+    const g = envGain(t0, 0.006, 0.10, 0.22, 0.14, t0+dur);
+
+    const ws = ac.createWaveShaper();
+    ws.curve = makeSaturationCurve(lerp(0.18, 0.95, S.fxDrive) * (S.grime ? 1.2 : 1.0));
+    ws.oversample = "4x";
+
+    const p = panNode(rnd(0.12,-0.12)*S.stereo);
+
+    const m1 = ac.createGain(); m1.gain.value = 0.70;
+    const m2 = ac.createGain(); m2.gain.value = 0.35;
+
+    o1.connect(m1); o2.connect(m2);
+    m1.connect(lp); m2.connect(lp);
+    lp.connect(g); g.connect(ws); ws.connect(p); p.connect(bassG);
+
+    o1.start(t0); o2.start(t0);
+    o1.stop(t0+dur+0.4); o2.stop(t0+dur+0.4);
+  }
+
+  function playLead(t0, dur, midi, v=1) {
+    if (!S.enLead) return;
+
+    // slightly "instrumenty": sine + triangle with formant-ish bandpass
+    const o1 = ac.createOscillator(); o1.type="sine";
+    const o2 = ac.createOscillator(); o2.type="triangle";
+    const f = mtof(midi);
+    o1.frequency.setValueAtTime(f, t0);
+    o2.frequency.setValueAtTime(f*2, t0);
+
+    // vibrato
+    const lfo = ac.createOscillator(); lfo.type="sine"; lfo.frequency.value = 5.5 + rnd(1.0,-1.0);
+    const lfg = ac.createGain(); lfg.gain.value = lerp(6, 22, S.leadBusy);
+    lfo.connect(lfg); lfg.connect(o1.detune); lfg.connect(o2.detune);
+
+    const g = envGain(t0, 0.004, 0.10, 0.08, 0.12, t0+dur);
+
+    const bp1 = ac.createBiquadFilter(); bp1.type="bandpass"; bp1.Q.value = 1.1;
+    bp1.frequency.value = lerp(900, 2800, 0.45 + 0.45*S.leadBusy) * lerp(0.9, 1.2, 1-S.lofi);
+
+    const ws = ac.createWaveShaper();
+    ws.curve = makeSaturationCurve(lerp(0.10, 0.55, S.fxDrive));
+
+    const p = panNode(rnd(0.6,-0.6)*S.stereo);
+
+    const mix = ac.createGain();
+    mix.gain.value = v;
+
+    o1.connect(bp1); o2.connect(bp1);
+    bp1.connect(g); g.connect(ws); ws.connect(mix); mix.connect(p); p.connect(leadG);
+
+    lfo.start(t0);
+    o1.start(t0); o2.start(t0);
+    o1.stop(t0+dur+0.35); o2.stop(t0+dur+0.35);
+    lfo.stop(t0+dur+0.35);
+  }
+
+  // ---------- music logic ----------
+  function secondsPerBeat(){ return 60 / S.bpm; }
+  const STEPS_PER_BAR = 16;
 
   function scaleForMode(rootMidi, mode) {
     const MAJ = [0,2,4,5,7,9,11];
     const MIN = [0,2,3,5,7,8,10];
     return (mode==="major"?MAJ:MIN).map(i => rootMidi+i);
   }
-
   function chordFromDegree(scale, degreeIndex, oct=0) {
     const deg = degreeIndex % 7;
     const root = scale[deg] + oct*12;
@@ -176,7 +841,6 @@
     const seventh = scale[(deg+6)%7] + (deg+6>=7?12:0) + oct*12;
     return [root, third, fifth, seventh];
   }
-
   function quantToScale(m, scale) {
     const pc = ((m%12)+12)%12;
     const pcs = scale.map(x=>((x%12)+12)%12);
@@ -188,654 +852,258 @@
     return m + (((best - pc) + 12) % 12);
   }
 
-  function makeSaturationCurve(amount=0.6) {
-    const n = 44100;
-    const curve = new Float32Array(n);
-    const k = clamp(amount,0,1)*12 + 1;
+  function regenPhrase() {
+    const len = clamp((S.phraseLen|0), 4, 16);
+    const base = [];
+    // degree steps (0..6) with rhythmic “shape”
+    const stepChoices = [0,1,2,3,4,5,6];
+    let d = choose([0,2,4]);
+    for (let i=0;i<len;i++){
+      const jump = choose([ -2,-1,0,1,2,3,-3,4 ]);
+      if (Math.random() < 0.25) d = choose([0,2,4,5]); else d = clamp(d + jump, 0, 6);
+      base.push(d);
+    }
+    // add a “hook” resolution
+    base[len-1] = choose([0,2,4]);
+    base[len-2] = choose([1,3,5]);
+    S.phrase = base;
+    S.phraseIdx = 0;
+  }
+
+  function mutatePhrase(scale) {
+    if (!S.phrase.length) regenPhrase();
+    const p = S.phrase.slice();
+    const m = S.mutate;
+    const n = p.length;
+
     for (let i=0;i<n;i++){
-      const x = (i*2/n)-1;
-      curve[i] = Math.tanh(k*x)/Math.tanh(k);
+      if (Math.random() < 0.15*m) p[i] = clamp(p[i] + choose([-2,-1,1,2,3,-3]), 0, 6);
+      if (Math.random() < 0.06*m) p[i] = choose([0,2,4,5,6]);
     }
-    return curve;
+    // keep last note somewhat resolving
+    if (Math.random() < 0.45*m) p[n-1] = choose([0,2,4]);
+    S.phrase = p;
   }
 
-  function makeNoiseSrc() {
-    const bufferSize = 2 * ac.sampleRate;
-    const buffer = ac.createBuffer(1, bufferSize, ac.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i=0;i<bufferSize;i++) data[i] = (Math.random()*2-1) * 0.35;
-    const src = ac.createBufferSource();
-    src.buffer = buffer;
-    src.loop = true;
-    src.start();
-    return src;
-  }
-
-  function makeBitCrusher() {
-    const node = ac.createScriptProcessor(1024, 1, 1);
-    let phase = 0, last = 0;
-    let reduction = 0.6, downsample = 6;
-    node.onaudioprocess = (e) => {
-      const input = e.inputBuffer.getChannelData(0);
-      const output = e.outputBuffer.getChannelData(0);
-      for (let i=0;i<input.length;i++){
-        phase++;
-        if (phase >= downsample) {
-          phase = 0;
-          const steps = 2 + Math.floor(62*(1-reduction));
-          last = Math.round(input[i]*steps)/steps;
-        }
-        output[i] = last;
-      }
-    };
-    return {
-      input: node, output: node,
-      set(amount, ds) { reduction = clamp(amount,0,1); downsample = clamp(ds|0,1,32); }
-    };
-  }
-
-  function makeImpulseResponse(seconds=1.8, decay=2.2) {
-    const rate = ac.sampleRate;
-    const len = Math.floor(rate * seconds);
-    const ir = ac.createBuffer(2, len, rate);
-    for (let ch=0; ch<2; ch++){
-      const d = ir.getChannelData(ch);
-      for (let i=0;i<len;i++){
-        const t = i/len;
-        // slightly colored + decaying noise
-        d[i] = (Math.random()*2-1) * Math.pow(1-t, decay);
-      }
-    }
-    return ir;
-  }
-
-  function softLP(freq, q=0.4) {
-    const f = ac.createBiquadFilter();
-    f.type="lowpass"; f.frequency.value=freq; f.Q.value=q;
-    return f;
-  }
-
-  // ---------- instruments ----------
-  let clickBuf=null, snareBuf=null, hatBuf=null;
-
-  function makeClickBuffer() {
-    if (clickBuf) return clickBuf;
-    const len = 128;
-    clickBuf = ac.createBuffer(1, len, ac.sampleRate);
-    const d = clickBuf.getChannelData(0);
-    for (let i=0;i<len;i++) d[i] = (Math.random()*2-1) * Math.exp(-i/18);
-    return clickBuf;
-  }
-
-  function makeSnareNoise() {
-    if (snareBuf) return snareBuf;
-    const len = ac.sampleRate * 0.25;
-    snareBuf = ac.createBuffer(1, len|0, ac.sampleRate);
-    const d = snareBuf.getChannelData(0);
-    for (let i=0;i<d.length;i++) d[i] = (Math.random()*2-1) * Math.exp(-i/2000);
-    return snareBuf;
-  }
-
-  function makeHatNoise() {
-    if (hatBuf) return hatBuf;
-    const len = ac.sampleRate * 0.12;
-    hatBuf = ac.createBuffer(1, len|0, ac.sampleRate);
-    const d = hatBuf.getChannelData(0);
-    for (let i=0;i<d.length;i++) d[i] = (Math.random()*2-1) * Math.exp(-i/900);
-    return hatBuf;
-  }
-
-  function playKick(t) {
-    const o = ac.createOscillator();
-    o.type = "sine";
-    const g = ac.createGain();
-
-    o.frequency.setValueAtTime(140, t);
-    o.frequency.exponentialRampToValueAtTime(52, t + 0.09);
-
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(1.0, t + 0.004);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
-
-    const click = ac.createBufferSource();
-    click.buffer = makeClickBuffer();
-    const cg = ac.createGain();
-    cg.gain.setValueAtTime(0.2, t);
-    cg.gain.exponentialRampToValueAtTime(0.0001, t+0.02);
-
-    o.connect(g); g.connect(kickGain);
-    click.connect(cg); cg.connect(kickGain);
-
-    o.start(t); o.stop(t+0.35);
-    click.start(t); click.stop(t+0.03);
-  }
-
-  function playSnare(t, tone=2100) {
-    const n = ac.createBufferSource();
-    n.buffer = makeSnareNoise();
-    const nf = ac.createBiquadFilter();
-    nf.type = "bandpass"; nf.frequency.value = tone; nf.Q.value = 0.6;
-
-    const ng = ac.createGain();
-    ng.gain.setValueAtTime(0.0001, t);
-    ng.gain.exponentialRampToValueAtTime(0.65, t+0.004);
-    ng.gain.exponentialRampToValueAtTime(0.0001, t+0.18);
-
-    n.connect(nf); nf.connect(ng); ng.connect(snareGain);
-
-    const o = ac.createOscillator();
-    o.type = "triangle"; o.frequency.setValueAtTime(180, t);
-    const og = ac.createGain();
-    og.gain.setValueAtTime(0.0001, t);
-    og.gain.exponentialRampToValueAtTime(0.35, t+0.002);
-    og.gain.exponentialRampToValueAtTime(0.0001, t+0.08);
-    o.connect(og); og.connect(snareGain);
-
-    n.start(t); n.stop(t+0.22);
-    o.start(t); o.stop(t+0.12);
-  }
-
-  function playHat(t, open=0.06) {
-    const n = ac.createBufferSource();
-    n.buffer = makeHatNoise();
-    const hp = ac.createBiquadFilter();
-    hp.type="highpass"; hp.frequency.value=6500; hp.Q.value=0.3;
-
-    const g = ac.createGain();
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.25, t+0.001);
-    g.gain.exponentialRampToValueAtTime(0.0001, t+open);
-
-    n.connect(hp); hp.connect(g); g.connect(hatGain);
-    n.start(t); n.stop(t+open+0.02);
-  }
-
-  function envGain(atk, dec, sus, rel, t0, t1) {
-    const g = ac.createGain();
-    g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(1.0, t0 + atk);
-    g.gain.exponentialRampToValueAtTime(Math.max(0.0001, sus), t0 + atk + dec);
-    g.gain.setValueAtTime(Math.max(0.0001, sus), t1);
-    g.gain.exponentialRampToValueAtTime(0.0001, t1 + rel);
-    return g;
-  }
-
-  function playChord(t0, dur, chordMidi, brightness=0.4) {
-    const out = ac.createGain();
-    out.gain.value = 1.0;
-
-    const lp = softLP(lerp(900, 4200, brightness), 0.6);
-    out.connect(lp);
-
-    // optional chorus send (global chorus already, but extra depth here makes it lush)
-    lp.connect(chordBus);
-
-    chordMidi.forEach((m, i) => {
-      const o = ac.createOscillator();
-      o.type = "triangle";
-      o.detune.value = (i-1.5)*rnd(4,2) + rnd(1,-1);
-      o.frequency.setValueAtTime(mtof(m), t0);
-
-      const g = envGain(0.12, 0.5, 0.22, 0.35, t0, t0+dur);
-      o.connect(g); g.connect(out);
-
-      o.start(t0);
-      o.stop(t0 + dur + 1.0);
-    });
-  }
-
-  function playBass(t0, dur, midi, lofi=0.6, bassVar=0.3) {
-    const o = ac.createOscillator();
-    o.type = "sawtooth";
-    o.frequency.setValueAtTime(mtof(midi), t0);
-
-    const g = envGain(0.01, 0.08, 0.22, 0.12, t0, t0+dur);
-
-    // bass randomness changes cutoff + subtle detune + drive
-    const cutoff = lerp(140, 620, 1-lofi) * lerp(0.85, 1.30, bassVar * rnd(1,0));
-    const lp = softLP(cutoff, 0.9);
-
-    const ws = ac.createWaveShaper();
-    ws.curve = makeSaturationCurve(lerp(0.30, 0.85, lofi) * lerp(0.9, 1.25, bassVar));
-    ws.oversample = "2x";
-
-    o.detune.value = rnd(8,-8) * bassVar;
-
-    o.connect(g); g.connect(lp); lp.connect(ws); ws.connect(bassBus);
-
-    o.start(t0);
-    o.stop(t0 + dur + 0.3);
-  }
-
-  function playLead(t0, dur, midi, bright=0.5, trebleVar=0.4) {
-    const o = ac.createOscillator();
-    o.type = "sine";
-    o.frequency.setValueAtTime(mtof(midi), t0);
-
-    const g = envGain(0.005, 0.09, 0.08, 0.12, t0, t0+dur);
-
-    const bp = ac.createBiquadFilter();
-    bp.type = "bandpass";
-    bp.frequency.value = lerp(800, 3200, bright) * lerp(0.9, 1.25, trebleVar*rnd(1,0));
-    bp.Q.value = lerp(1.1, 2.4, trebleVar);
-
-    const l = ac.createOscillator();
-    l.type = "sine";
-    l.frequency.value = 5.2 + rnd(1.2,-1.2);
-    const lg = ac.createGain();
-    lg.gain.value = lerp(6, 22, trebleVar); // cents
-    l.connect(lg); lg.connect(o.detune);
-
-    o.connect(g); g.connect(bp); bp.connect(leadBus);
-
-    l.start(t0); l.stop(t0+dur+0.4);
-    o.start(t0); o.stop(t0+dur+0.4);
-  }
-
-  // ---------- build graph ----------
-  function makeAC() {
-    ac = new (window.AudioContext || window.webkitAudioContext)();
-
-    master = ac.createGain();
-    master.gain.value = 0.9;
-
-    masterHP = ac.createBiquadFilter();
-    masterHP.type="highpass";
-    masterHP.frequency.value = 30;
-
-    masterLP = ac.createBiquadFilter();
-    masterLP.type="lowpass";
-    masterLP.frequency.value = 14000;
-    masterLP.Q.value = 0.5;
-
-    masterSat = ac.createWaveShaper();
-    masterSat.curve = makeSaturationCurve(0.7);
-    masterSat.oversample = "2x";
-
-    masterComp = ac.createDynamicsCompressor();
-    masterComp.threshold.value = -18;
-    masterComp.knee.value = 24;
-    masterComp.ratio.value = 3.2;
-    masterComp.attack.value = 0.01;
-    masterComp.release.value = 0.25;
-
-    // Lo-fi split: dry + crushed
-    lofiMix = { dry: ac.createGain(), wet: ac.createGain(), sum: ac.createGain() };
-    lofiMix.dry.gain.value = 0.55;
-    lofiMix.wet.gain.value = 0.45;
-
-    bitCrusher = makeBitCrusher();
-
-    // Tape delay + feedback
-    tapeDelay = ac.createDelay(1.0);
-    tapeDelay.delayTime.value = 0.13;
-    tapeFB = ac.createGain();
-    tapeFB.gain.value = 0.18;
-
-    delaySend = ac.createGain();
-    delaySend.gain.value = 0.18;
-
-    tapeWowLFO = ac.createOscillator();
-    tapeWowLFO.type = "sine";
-    tapeWowLFO.frequency.value = 0.22;
-    tapeWowGain = ac.createGain();
-    tapeWowGain.gain.value = 0.0025;
-
-    tapeFlutterLFO = ac.createOscillator();
-    tapeFlutterLFO.type = "sine";
-    tapeFlutterLFO.frequency.value = 5.5;
-    tapeFlutterGain = ac.createGain();
-    tapeFlutterGain.gain.value = 0.00035;
-
-    tapeWowLFO.connect(tapeWowGain);
-    tapeFlutterLFO.connect(tapeFlutterGain);
-    tapeWowGain.connect(tapeDelay.delayTime);
-    tapeFlutterGain.connect(tapeDelay.delayTime);
-    tapeWowLFO.start();
-    tapeFlutterLFO.start();
-
-    // Reverb
-    convolver = ac.createConvolver();
-    convolver.buffer = makeImpulseResponse(1.8, 2.2);
-    reverbSend = ac.createGain();
-    reverbSend.gain.value = 0.18;
-    reverbGain = ac.createGain();
-    reverbGain.gain.value = 0.25;
-
-    // Chorus (master-ish) using modulated delay
-    chorusDelay = ac.createDelay(0.05);
-    chorusDelay.delayTime.value = 0.018;
-    chorusLFO = ac.createOscillator();
-    chorusLFO.type = "sine";
-    chorusLFO.frequency.value = 0.19;
-    chorusDepth = ac.createGain();
-    chorusDepth.gain.value = 0.004;
-    chorusMix = ac.createGain();
-    chorusMix.gain.value = 0.25;
-
-    chorusLFO.connect(chorusDepth);
-    chorusDepth.connect(chorusDelay.delayTime);
-    chorusLFO.start();
-
-    // Noise
-    noiseGain = ac.createGain();
-    noiseGain.gain.value = 0.015;
-
-    const noise = makeNoiseSrc();
-    const noiseLP = ac.createBiquadFilter();
-    noiseLP.type="lowpass"; noiseLP.frequency.value = 4500; noiseLP.Q.value = 0.2;
-    const noiseHP = ac.createBiquadFilter();
-    noiseHP.type="highpass"; noiseHP.frequency.value = 200; noiseHP.Q.value = 0.2;
-    noise.connect(noiseHP); noiseHP.connect(noiseLP); noiseLP.connect(noiseGain);
-
-    // buses
-    drumBus = ac.createGain(); drumBus.gain.value = 0.9;
-    musicBus = ac.createGain(); musicBus.gain.value = 0.9;
-
-    chordBus = ac.createGain(); chordBus.gain.value = 0.6;
-    bassBus  = ac.createGain(); bassBus.gain.value  = 0.55;
-    leadBus  = ac.createGain(); leadBus.gain.value  = 0.25;
-
-    chordBus.connect(musicBus);
-    bassBus.connect(musicBus);
-    leadBus.connect(musicBus);
-
-    // route to dry
-    drumBus.connect(lofiMix.dry);
-    musicBus.connect(lofiMix.dry);
-
-    // route to crushed
-    drumBus.connect(bitCrusher.input);
-    musicBus.connect(bitCrusher.input);
-    bitCrusher.output.connect(lofiMix.wet);
-
-    // sum
-    lofiMix.dry.connect(lofiMix.sum);
-    lofiMix.wet.connect(lofiMix.sum);
-
-    // delay send
-    lofiMix.sum.connect(delaySend);
-    delaySend.connect(tapeDelay);
-    tapeDelay.connect(tapeFB);
-    tapeFB.connect(tapeDelay);
-
-    // reverb send
-    lofiMix.sum.connect(reverbSend);
-    reverbSend.connect(convolver);
-    convolver.connect(reverbGain);
-
-    // chorus: feed sum through mod delay and mix back
-    lofiMix.sum.connect(chorusDelay);
-    chorusDelay.connect(chorusMix);
-
-    // master input
-    const preMaster = ac.createGain();
-    preMaster.gain.value = 1.0;
-
-    lofiMix.sum.connect(preMaster);
-    tapeDelay.connect(preMaster);
-    reverbGain.connect(preMaster);
-    chorusMix.connect(preMaster);
-    noiseGain.connect(preMaster);
-
-    // master chain
-    preMaster.connect(masterHP);
-    masterHP.connect(masterLP);
-    masterLP.connect(masterSat);
-    masterSat.connect(masterComp);
-    masterComp.connect(master);
-    master.connect(ac.destination);
-
-    // drum gains
-    kickGain = ac.createGain(); kickGain.gain.value = 0.95;
-    snareGain= ac.createGain(); snareGain.gain.value= 0.55;
-    hatGain  = ac.createGain(); hatGain.gain.value  = 0.25;
-
-    kickGain.connect(drumBus);
-    snareGain.connect(drumBus);
-    hatGain.connect(drumBus);
-  }
-
-  // ---------- scheduler ----------
-  const STEPS_PER_BAR = 16;
-
-  function stepDur(){ return secondsPerBeat()/2; } // 8th grid, with swing offset
-
-  function scheduleAhead() {
-    if (!isRunning) return;
-    const now = ac.currentTime;
-    const lookahead = 0.25;
-    while (state.nextTime < now + lookahead) {
-      scheduleStep(state.nextTime, state.step, state.bar);
-      advanceStep();
+  function maybeChangeKey() {
+    if (!S.autoKey) return;
+    const k = S.keyDrift;
+    if (Math.random() < (0.06 + 0.22*k)) {
+      const shift = choose([-7,-5,-2,2,5,7,12,-12]);
+      S.keyRoot = clamp(S.keyRoot + shift, 45, 72);
+      if (Math.random() < 0.25*k) S.mode = (S.mode==="minor" ? "major" : "minor");
+      if (Math.random() < 0.35*k) S.useAlt = !S.useAlt;
     }
   }
 
-  function advanceStep() {
-    state.step++;
-    const sd = stepDur();
-    const swingAmt = clamp(0.02 + 0.05*(state.swing.v*0.5+0.5), 0.0, 0.08);
-    const isOff = (state.step % 2) === 1;
-    state.nextTime += sd + (isOff ? swingAmt : 0);
+  function applyLiveParams(t) {
+    // master
+    masterG.gain.setTargetAtTime(S.master, t, 0.04);
 
-    if (state.step >= STEPS_PER_BAR) {
-      state.step = 0;
-      state.bar++;
-      onNewBar();
-    }
-  }
+    // overall mix
+    drumsMixG.gain.setTargetAtTime(S.mixDrums * (S.enDrums?1:0), t, 0.05);
+    musicMixG.gain.setTargetAtTime(1.0, t, 0.05);
 
-  function onNewBar() {
-    if (state.bar % 8 === 0 && Math.random() < 0.35) state.useAlt = !state.useAlt;
+    // instrument gains
+    kickG.gain.setTargetAtTime(S.mixKick, t, 0.05);
+    snareG.gain.setTargetAtTime(S.mixSnare, t, 0.05);
+    hatsG.gain.setTargetAtTime(S.mixHats, t, 0.05);
+    chordsG.gain.setTargetAtTime(S.mixChords, t, 0.05);
+    bassG.gain.setTargetAtTime(S.mixBass, t, 0.05);
+    leadG.gain.setTargetAtTime(S.mixLead, t, 0.05);
 
-    if (state.bar % 16 === 0 && Math.random() < 0.28) {
-      const shift = choose([ -2, -5, 2, 5 ]);
-      state.keyRoot = clamp(state.keyRoot + shift, 45, 69);
-      if (Math.random() < 0.25) state.mode = (state.mode==="minor" ? "major" : "minor");
-    }
+    // noise
+    noiseGain.gain.setTargetAtTime(lerp(0.002, 0.035, S.mixNoise) * lerp(0.75, 1.25, S.lofi), t, 0.1);
+
+    // EQ
+    bassEQ.gain.setTargetAtTime(S.bassEQ, t, 0.08);
+    trebleEQ.gain.setTargetAtTime(S.trebleEQ, t, 0.08);
+
+    // master LP "lofi"
+    const lpHz = lerp(6500, 18000, 1 - S.lofi);
+    masterLP.frequency.setTargetAtTime(lpHz, t, 0.15);
+
+    // FX
+    delaySendG.gain.setTargetAtTime(lerp(0.0, 0.45, S.fxDelay), t, 0.12);
+    delayFBG.gain.setTargetAtTime(lerp(0.06, 0.34, S.fxDelay), t, 0.12);
+    delayNode.delayTime.setTargetAtTime(lerp(0.16, 0.46, S.fxDelay), t, 0.15);
+
+    revSendG.gain.setTargetAtTime(lerp(0.0, 0.45, S.fxReverb), t, 0.12);
+    revWetG.gain.setTargetAtTime(lerp(0.0, 0.55, S.fxReverb), t, 0.12);
+
+    chorusWetG.gain.setTargetAtTime(lerp(0.0, 0.42, S.fxChorus), t, 0.12);
+    chorusDepthG.gain.setTargetAtTime(lerp(0.0015, 0.0072, S.fxChorus), t, 0.12);
+    chorusLFO.frequency.setTargetAtTime(lerp(0.12, 0.35, S.fxChorus), t, 0.12);
+
+    // drive + grime enable
+    masterSat.curve = makeSaturationCurve(lerp(0.15, 0.65, S.fxDrive));
+    grimeDrive.curve = makeSaturationCurve(S.grime ? lerp(0.75, 0.98, S.fxDrive) : 0.35);
+
+    // stereo width
+    const wid = lerp(0.85, 1.35, S.stereo);
+    stereoWidenerL.gain.setTargetAtTime(wid, t, 0.1);
+    stereoWidenerR.gain.setTargetAtTime(wid, t, 0.1);
+
+    // wub
+    wubLFO.frequency.setTargetAtTime(S.wubRate, t, 0.06);
+    wubDepthG.gain.setTargetAtTime(S.wub ? lerp(0.0, 2200, S.wubDepth) : 0.0, t, 0.08);
   }
 
   function scheduleStep(t, step, bar) {
-    // slow drift
-    const drift   = smoothWander(state.drift,   0.004, 0.0015);
-    const bright  = smoothWander(state.bright,  0.006, 0.002);
-    const wow     = smoothWander(state.wow,     0.004, 0.0015);
-    const flutter = smoothWander(state.flutter, 0.004, 0.0015);
-    smoothWander(state.swing, 0.002, 0.0012);
+    applyLiveParams(t);
 
-    // LIVE params (sliders update state continuously)
-    const lofi     = state.lofi;
-    const dens     = state.density;
-    const bassVar  = state.bassVar;
-    const trebVar  = state.trebleVar;
-    const fxDelay  = state.fxDelay;
-    const fxReverb = state.fxReverb;
-    const fxChorus = state.fxChorus;
+    // evolving drift drivers (used for phrase/key/visual)
+    const drift   = smoothWander(S.drift,   0.004, 0.0015);
+    const bright  = smoothWander(S.bright,  0.006, 0.002);
+    smoothWander(S.wow,     0.004, 0.0015);
+    smoothWander(S.flutter, 0.004, 0.0015);
+    smoothWander(S.swingW,  0.003, 0.0012);
 
-    // master tone breathes + treble randomness influences cutoff range
-    const trebleBreathe = clamp(0.35 + bright*0.35 + (1-lofi)*0.35 + (trebVar-0.5)*0.22, 0, 1);
-    const lpHz = lerp(5200, 15000, trebleBreathe);
-    masterLP.frequency.setTargetAtTime(lpHz, t, 0.15);
+    const dens = S.density;
+    const s = step % 16;
 
-    // noise follows lofi + a little dens
-    noiseGain.gain.setTargetAtTime(lerp(0.004, 0.032, lofi) * lerp(0.85, 1.15, dens), t, 0.2);
-
-    // crusher follows lofi; downsample follows drift
-    const crushAmt = clamp(lerp(0.20, 0.86, lofi), 0, 1);
-    const ds = 3 + Math.floor(lerp(2, 18, clamp((drift*0.5+0.5),0,1)));
-    bitCrusher.set(crushAmt, ds);
-
-    // IMPORTANT: set wet/dry explicitly from lofi (so it updates live correctly)
-    const wet = lerp(0.12, 0.62, lofi);
-    lofiMix.wet.gain.setTargetAtTime(wet, t, 0.1);
-    lofiMix.dry.gain.setTargetAtTime(1 - wet, t, 0.1);
-
-    // tape modulation (also influenced by fxDelay)
-    tapeWowGain.gain.setTargetAtTime(lerp(0.0009, 0.0038, clamp(0.5+wow*0.35,0,1)) * lerp(0.7, 1.35, fxDelay), t, 0.2);
-    tapeFlutterGain.gain.setTargetAtTime(lerp(0.00012,0.0006, clamp(0.5+flutter*0.35,0,1)) * lerp(0.7, 1.35, fxDelay), t, 0.2);
-
-    tapeDelay.delayTime.setTargetAtTime(lerp(0.095, 0.180, clamp(0.5+drift*0.25,0,1)), t, 0.2);
-
-    // FX sliders (live)
-    delaySend.gain.setTargetAtTime(lerp(0.04, 0.35, fxDelay), t, 0.12);
-    tapeFB.gain.setTargetAtTime(lerp(0.10, 0.28, fxDelay), t, 0.15);
-
-    reverbSend.gain.setTargetAtTime(lerp(0.02, 0.40, fxReverb), t, 0.18);
-    reverbGain.gain.setTargetAtTime(lerp(0.0, 0.55, fxReverb), t, 0.18);
-
-    chorusMix.gain.setTargetAtTime(lerp(0.0, 0.45, fxChorus), t, 0.18);
-    chorusDepth.gain.setTargetAtTime(lerp(0.0015, 0.0065, fxChorus), t, 0.18);
-    chorusLFO.frequency.setTargetAtTime(lerp(0.12, 0.32, fxChorus), t, 0.18);
-
-    // harmony
-    const scale = scaleForMode(state.keyRoot, state.mode);
-    const prog = state.useAlt ? state.progAlt : state.prog;
+    const scale = scaleForMode(S.keyRoot, S.mode);
+    const prog = S.useAlt ? S.progAlt : S.prog;
     const chordDeg = prog[bar % prog.length];
     const chord = chordFromDegree(scale, chordDeg, 0);
 
-    // voicing drift + treble randomness makes occasional octave flips
-    const voicingShift = Math.round(clamp(drift*2, -2, 2));
-    const voiced = chord.map((m,i)=> {
+    // richer voicing
+    const voicingShift = Math.round(clamp(drift*3, -3, 3));
+    const voiced = chord.map((m,i)=>{
       let x = m + (i===0 ? -12 : 0) + voicingShift;
-      if (i===3 && Math.random() < 0.35*trebVar) x += 12;
+      if (i===3 && Math.random() < 0.45*(0.2+S.leadBusy)) x += 12;
+      if (i===1 && Math.random() < 0.20*(0.2+S.mutate)) x -= 12;
       return x;
     });
 
     // ----- drums -----
-    const s = step % 16;
+    if (S.enDrums) {
+      const kickProb2 = lerp(0.25, 0.75, dens);
+      const fillProb  = lerp(0.10, 0.45, dens);
 
-    if (s === 0 || (s === 8 && Math.random() < lerp(0.75, 0.45, lofi)) ||
-        (s === 12 && Math.random() < 0.15*dens)) {
-      playKick(t);
+      // kick patterns
+      if (s===0) playKick(t, 1.0);
+      if (s===8 && Math.random()<0.85) playKick(t, 0.95);
+      if ((s===6 || s===10 || s===12) && Math.random()<kickProb2*0.35) playKick(t, 0.75);
+      if ((s===14) && Math.random()<fillProb*0.25) playKick(t, 0.65);
+
+      // snare on 2/4 + ghost
+      if (s===4 || s===12) playSnare(t, 1.0);
+      if ((s===3 || s===7 || s===15) && Math.random() < 0.22*dens) playSnare(t, 0.35);
+
+      // hats: 8ths + 16th sprinkles
+      const hatBase = lerp(0.35, 0.92, dens);
+      if (s%2===0 && Math.random()<hatBase) playHat(t, lerp(0.035, 0.070, S.lofi), 1.0);
+      if (Math.random()<0.18*dens && (s%4===1)) playHat(t, lerp(0.040, 0.095, S.lofi), 0.85);
+      if (Math.random()<0.12*dens && (s===13 || s===9)) playHat(t, 0.12, 0.9);
     }
-
-    if (s === 4 || s === 12) {
-      playSnare(t, lerp(1850, 2500, clamp(0.5+bright*0.4,0,1)));
-    } else if ((s === 14 || s === 6) && Math.random() < 0.08*dens) {
-      playSnare(t, 2800);
-    }
-
-    const hatProb = lerp(0.25, 0.92, dens);
-    if (Math.random() < hatProb && (s % 2 === 0)) playHat(t, lerp(0.03, 0.07, lofi));
-    if (Math.random() < 0.2*dens && (s % 4 === 3)) playHat(t, lerp(0.05, 0.11, lofi));
 
     // ----- chords -----
-    if (s === 0 || s === 8) {
-      const chordBright = clamp(0.45 + bright*0.35 + (trebVar-0.5)*0.18, 0, 1);
-      playChord(t, secondsPerBeat()*2.0, voiced, chordBright);
-    } else if (s === 15 && Math.random() < 0.15*dens) {
-      playChord(t, secondsPerBeat()*1.0, voiced, clamp(0.35 + bright*0.35, 0, 1));
+    if (S.enChords && (s===0 || s===8)) {
+      const chordBright = clamp(0.38 + 0.42*(bright*0.5+0.5) + 0.22*(1-S.lofi), 0, 1);
+      playChord(t, secondsPerBeat()*2.0, voiced, chordBright, 1.0);
+    }
+    if (S.enChords && s===15 && Math.random()<0.25*dens) {
+      playChord(t, secondsPerBeat()*1.0, voiced, 0.45, 0.7);
     }
 
     // ----- bass -----
-    // bass randomness affects probability of passing notes + note choices
-    if (s === 0 || s === 8) {
-      const root = voiced[0];
-      playBass(t, secondsPerBeat()*1.75, root, lofi, bassVar);
+    if (S.enBass) {
+      if (s===0 || s===8) {
+        playBass(t, secondsPerBeat()*1.85, voiced[0], 1.0, true);
+      }
+
+      // passing notes more randomized
+      const passProb = (0.15 + 0.40*S.mutate) * dens;
+      if ((s===6 || s===14 || s===10) && Math.random()<passProb) {
+        const nextDeg = prog[(bar+1)%prog.length];
+        const nextChord = chordFromDegree(scale, nextDeg, 0);
+        const target = nextChord[0]-12;
+
+        const options = (S.mutate>0.5)
+          ? [-12,-7,-5,-3,-2,-1,1,2,3,5,7,12]
+          : [-5,-3,-2,-1,1,2,3,5];
+
+        const pass = quantToScale(target + choose(options), scale);
+        playBass(t, secondsPerBeat()*0.70, pass, 0.9, true);
+      }
     }
 
-    const passProb = (0.18 + 0.26*bassVar) * dens;
-    if ((s === 6 || s === 14) && Math.random() < passProb) {
-      const nextDeg = prog[(bar+1) % prog.length];
-      const nextChord = chordFromDegree(scale, nextDeg, 0);
-      const target = nextChord[0]-12;
-      const stepChoices = bassVar > 0.55 ? [-5,-3,-2,-1,1,2,3,5] : [-2,-1,1,2];
-      const pass = quantToScale(target + choose(stepChoices), scale);
-      playBass(t, secondsPerBeat()*0.75, pass, lofi, bassVar);
-    }
+    // ----- lead: phrase-based motif with mutation + key changes -----
+    if (S.enLead) {
+      const phrase = S.phrase.length ? S.phrase : (regenPhrase(), S.phrase);
+      const leadGate = (0.10 + 0.30*S.leadBusy) * dens;
 
-    // ----- lead (treble randomness changes density + interval leaps) -----
-    const leadProb = (0.08 + 0.18*trebVar) * dens;
-    if (Math.random() < leadProb && (s === 2 || s === 10 || s === 14)) {
-      const chordTones = [voiced[1], voiced[2], voiced[3]];
-      let note = choose(chordTones) + choose([0,12,12,24]);
-      const leap = choose(trebVar>0.6 ? [-7,-5,-2,2,5,7,12] : [-2,-1,1,2,5]);
-      if (Math.random() < 0.5*trebVar) note += leap;
-      note = quantToScale(note, scale);
-      playLead(t, secondsPerBeat()*0.5, note, clamp(0.45 + bright*0.4, 0, 1), trebVar);
+      // phrase triggers mostly on 8ths/16ths
+      const phraseSlots = (s===2 || s===6 || s===10 || s===14 || (Math.random()<0.12*dens && (s===1 || s===9)));
+      if (phraseSlots && Math.random() < leadGate) {
+        const deg = phrase[S.phraseIdx % phrase.length];
+        S.phraseIdx++;
+
+        let note = scale[deg] + choose([12,12,24,0]);
+        if (Math.random() < 0.35*S.mutate) note += choose([-7,-5,-2,2,5,7,12]);
+
+        note = quantToScale(note, scale);
+        const dur = secondsPerBeat() * choose([0.25,0.5,0.5,0.75]);
+        playLead(t, dur, note, lerp(0.55, 1.0, S.leadBusy));
+      }
     }
   }
 
-  // ---------- UI: live slider binding ----------
-  function bindSlider(id, key, outId, fmt=(x)=>x.toFixed(2)) {
-    const el = document.getElementById(id);
-    const out= document.getElementById(outId);
-    const set = () => { state[key] = +el.value; out.textContent = (id==="tempo") ? String(el.value) : fmt(+el.value); };
-    el.addEventListener("input", set);
-    set();
+  function advanceStep() {
+    S.step++;
+    const sd = (secondsPerBeat()/2);
+    const swingAmt = lerp(0.0, 0.085, S.swing);
+    const isOff = (S.step % 2) === 1;
+    S.nextTime += sd + (isOff ? swingAmt : 0);
+
+    if (S.step >= STEPS_PER_BAR) {
+      S.step = 0;
+      S.bar++;
+
+      // phrase + key management
+      if (S.bar % 8 === 0 && Math.random() < 0.35 + 0.25*S.keyDrift) S.useAlt = !S.useAlt;
+
+      if (S.autoPhrase && (S.bar - S.phraseLastChangeBar) >= choose([4,8,8,16])) {
+        if (Math.random() < (0.25 + 0.55*S.mutate)) mutatePhrase(scaleForMode(S.keyRoot, S.mode));
+        if (Math.random() < (0.18 + 0.45*S.mutate)) regenPhrase();
+        S.phraseLastChangeBar = S.bar;
+        S.phraseIdx = 0;
+      }
+
+      if (S.autoKey && (S.bar % choose([4,8,8,16]) === 0)) {
+        if (Math.random() < (0.20 + 0.55*S.keyDrift)) maybeChangeKey();
+      }
+    }
   }
 
-  bindSlider("tempo","bpm","tempoVal",(x)=>String(Math.round(x)));
-  bindSlider("lofi","lofi","lofiVal");
-  bindSlider("dens","density","densVal");
-  bindSlider("bassVar","bassVar","bassVarVal");
-  bindSlider("trebleVar","trebleVar","trebleVarVal");
-  bindSlider("fxDelay","fxDelay","fxDelayVal");
-  bindSlider("fxReverb","fxReverb","fxReverbVal");
-  bindSlider("fxChorus","fxChorus","fxChorusVal");
+  function scheduleAhead() {
+    if (!running) return;
+    const now = ac.currentTime;
+    const lookahead = 0.25;
 
-  // ---------- start/stop ----------
-  document.getElementById("start").onclick = async () => {
-    if (isRunning) return;
-    if (!ac) makeAC();
-    await ac.resume();
+    while (S.nextTime < now + lookahead) {
+      scheduleStep(S.nextTime, S.step, S.bar);
+      advanceStep();
+    }
+  }
 
-    isRunning = true;
-    document.getElementById("start").disabled = true;
-    document.getElementById("stop").disabled = false;
-
-    state.bar = 0; state.step = 0;
-    state.nextTime = ac.currentTime + 0.05;
-
-    state.drift   = {v:0,dv:0};
-    state.bright  = {v:0,dv:0};
-    state.wow     = {v:0,dv:0};
-    state.flutter = {v:0,dv:0};
-    state.swing   = {v:0,dv:0};
-
-    master.gain.setValueAtTime(0.9, ac.currentTime);
-
-    timer = setInterval(scheduleAhead, 25);
-  };
-
-  document.getElementById("stop").onclick = () => {
-    if (!isRunning) return;
-    isRunning = false;
-    clearInterval(timer); timer = null;
-
-    const t = ac.currentTime;
-    master.gain.setTargetAtTime(0.0001, t, 0.15);
-    setTimeout(() => {
-      try { ac.suspend(); } catch {}
-      master.gain.setValueAtTime(0.9, ac.currentTime);
-    }, 450);
-
-    document.getElementById("start").disabled = false;
-    document.getElementById("stop").disabled = true;
-  };
-
-  // ---------- FRACTAL: Julia set driven by music ----------
+  // ---------- Fractals ----------
   const canvas = document.getElementById("fractal");
-  const ctx = canvas.getContext("2d", { alpha: false });
-  const W = canvas.width, H = canvas.height;
-  const img = ctx.createImageData(W, H);
-  let lastFrame = 0;
+  const ctx = canvas.getContext("2d", { alpha:false });
+  let W = canvas.width, H = canvas.height;
+  let img = ctx.createImageData(W,H);
+  let lastFractalSwitch = 0;
+  let lastRender = 0;
 
-  // derived "music variables" used by the fractal
-  const vis = {
-    drift: 0, bright: 0, wow: 0, flutter: 0, swing: 0
-  };
+  const FRACTALS = ["mandelbrot","julia","burning_ship","tricorn","multibrot3","multibrot4","newton3","phoenix","celtic","spider"];
 
-  function updateVisFromMusic() {
-    // use the same wander states (even if not running, they’ll sit near 0)
-    vis.drift   = state.drift.v;
-    vis.bright  = state.bright.v;
-    vis.wow     = state.wow.v;
-    vis.flutter = state.flutter.v;
-    vis.swing   = state.swing.v;
+  function pickRandomFractal() {
+    const t = choose(FRACTALS);
+    S.fractalType = t;
+    UI.fractalType.value = t;
   }
 
-  // tiny HSV->RGB for psychedelic coloring
   function hsv2rgb(h,s,v){
     h = ((h%1)+1)%1;
     const i = Math.floor(h*6);
@@ -855,81 +1123,322 @@
     return [r,g,b];
   }
 
-  function renderFractal(timeMs) {
-    // throttle a bit to keep CPU sane
-    if (timeMs - lastFrame < 60) { requestAnimationFrame(renderFractal); return; }
-    lastFrame = timeMs;
+  function renderFractal(ts) {
+    const ms = ts;
+    if (ms - lastRender < (S.hiRes ? 35 : 70)) { requestAnimationFrame(renderFractal); return; }
+    lastRender = ms;
 
-    updateVisFromMusic();
+    // auto switch every 30s
+    if (S.autoFractal && (ms - lastFractalSwitch) > 30000) {
+      pickRandomFractal();
+      lastFractalSwitch = ms;
+    }
 
-    const lofi = state.lofi;
-    const dens = state.density;
-
-    // music-driven Julia parameters
-    const t = timeMs * 0.00008;
-    const wow = vis.wow*0.5+0.5;
-    const flutter = vis.flutter*0.5+0.5;
-    const drift = vis.drift*0.5+0.5;
-    const bright = vis.bright*0.5+0.5;
-
-    const bassVar = state.bassVar;
-    const trebleVar = state.trebleVar;
-
-    // Julia constant c = a + bi
-    const a = lerp(-0.82, -0.62, drift) + 0.06*Math.sin(t*2 + wow*3);
-    const b = lerp( 0.12,  0.32, bright) + 0.06*Math.cos(t*2.4 + flutter*4);
-
-    // zoom and rotation
-    const zoom = lerp(1.4, 2.8, lofi) * lerp(0.85, 1.25, bassVar);
-    const rot = t*0.9 + (trebleVar-0.5)*1.2;
-
-    const cosr = Math.cos(rot), sinr = Math.sin(rot);
-
-    // iterations driven by density
-    const maxIter = Math.floor(lerp(52, 140, dens));
-    const escape = 4.0;
+    // dynamic resolution (hiRes checkbox toggles)
+    const target = S.hiRes ? 720 : 540;
+    if (canvas.width !== target) {
+      canvas.width = canvas.height = target;
+      W = H = target;
+      img = ctx.createImageData(W,H);
+    }
 
     const data = img.data;
-    let idx = 0;
 
+    // music-driven params
+    const t = ms * 0.00008;
+    const lofi = S.lofi;
+    const dens = S.density;
+    const drift = S.drift.v*0.5+0.5;
+    const bright = S.bright.v*0.5+0.5;
+
+    const zoom = lerp(1.15, 3.4, 0.35 + 0.65*lofi) * lerp(0.85, 1.20, 0.5 + 0.5*S.mutate);
+    const rot = t*0.9 + (S.keyDrift-0.5)*1.7;
+    const cosr = Math.cos(rot), sinr = Math.sin(rot);
+
+    const maxIter = Math.floor(lerp(70, 220, dens));
+    const escape = 4.0;
+
+    // base constants (vary with music)
+    const ca = lerp(-0.82, -0.62, drift) + 0.08*Math.sin(t*2.0 + S.wubDepth*3.0);
+    const cb = lerp( 0.10,  0.34, bright) + 0.08*Math.cos(t*2.6 + S.fxChorus*4.0);
+
+    // fractal functions
+    const type = S.fractalType;
+
+    function iterate(x0,y0){
+      let x=x0, y=y0;
+      let px=0, py=0; // for phoenix/spider
+      let i=0;
+
+      if (type==="mandelbrot") {
+        // z=0; c=(x0,y0)
+        let zx=0, zy=0;
+        for (; i<maxIter; i++){
+          const zx2 = zx*zx - zy*zy + x0;
+          const zy2 = 2*zx*zy + y0;
+          zx=zx2; zy=zy2;
+          if (zx*zx + zy*zy > escape) break;
+        }
+        return i;
+      }
+
+      if (type==="julia") {
+        // z=(x0,y0); c=(ca,cb)
+        let zx=x0, zy=y0;
+        for (; i<maxIter; i++){
+          const zx2 = zx*zx - zy*zy + ca;
+          const zy2 = 2*zx*zy + cb;
+          zx=zx2; zy=zy2;
+          if (zx*zx + zy*zy > escape) break;
+        }
+        return i;
+      }
+
+      if (type==="burning_ship") {
+        let zx=0, zy=0;
+        for (; i<maxIter; i++){
+          const ax = Math.abs(zx), ay = Math.abs(zy);
+          const zx2 = ax*ax - ay*ay + x0;
+          const zy2 = 2*ax*ay + y0;
+          zx=zx2; zy=zy2;
+          if (zx*zx + zy*zy > escape) break;
+        }
+        return i;
+      }
+
+      if (type==="tricorn") {
+        let zx=0, zy=0;
+        for (; i<maxIter; i++){
+          // conjugate square: (zx - i zy)^2 + c
+          const zx2 = zx*zx - zy*zy + x0;
+          const zy2 = -2*zx*zy + y0;
+          zx=zx2; zy=zy2;
+          if (zx*zx + zy*zy > escape) break;
+        }
+        return i;
+      }
+
+      if (type==="multibrot3" || type==="multibrot4") {
+        const p = (type==="multibrot3") ? 3 : 4;
+        let zx=0, zy=0;
+        for (; i<maxIter; i++){
+          // z^p in polar
+          const r = Math.sqrt(zx*zx + zy*zy);
+          const a = Math.atan2(zy,zx);
+          const rp = Math.pow(r, p);
+          const ap = a*p;
+          zx = rp*Math.cos(ap) + x0;
+          zy = rp*Math.sin(ap) + y0;
+          if (zx*zx + zy*zy > escape) break;
+        }
+        return i;
+      }
+
+      if (type==="newton3") {
+        // Newton fractal for z^3 - 1 = 0
+        // z_{n+1} = z - (z^3-1)/(3 z^2)
+        let zx=x0, zy=y0;
+        for (; i<maxIter; i++){
+          // z^2
+          const z2x = zx*zx - zy*zy;
+          const z2y = 2*zx*zy;
+          // z^3 = z^2 * z
+          const z3x = z2x*zx - z2y*zy;
+          const z3y = z2x*zy + z2y*zx;
+
+          // f = z^3 - 1
+          const fx = z3x - 1, fy = z3y;
+
+          // f' = 3 z^2
+          const dfx = 3*z2x, dfy = 3*z2y;
+
+          // (f/f') complex division
+          const denom = dfx*dfx + dfy*dfy + 1e-12;
+          const qx = (fx*dfx + fy*dfy) / denom;
+          const qy = (fy*dfx - fx*dfy) / denom;
+
+          zx -= qx;
+          zy -= qy;
+
+          if (zx*zx + zy*zy > 1e6) break;
+          if (fx*fx + fy*fy < 1e-10) break;
+        }
+        return i;
+      }
+
+      if (type==="phoenix") {
+        // z_{n+1} = z_n^2 + c + p*z_{n-1}
+        // p is music-driven
+        const pr = lerp(-0.6, 0.2, 0.5 + 0.5*Math.sin(t*1.6 + S.fxDelay*2));
+        const pi = lerp(-0.2, 0.6, 0.5 + 0.5*Math.cos(t*1.3 + S.fxChorus*2));
+        let zx=x0, zy=y0;
+        for (; i<maxIter; i++){
+          const zx2 = zx*zx - zy*zy + ca + (pr*px - pi*py);
+          const zy2 = 2*zx*zy + cb + (pr*py + pi*px);
+          px=zx; py=zy;
+          zx=zx2; zy=zy2;
+          if (zx*zx + zy*zy > escape) break;
+        }
+        return i;
+      }
+
+      if (type==="celtic") {
+        // Celtic Mandelbrot: z_{n+1} = (|x^2 - y^2| + cx, 2xy + cy)
+        let zx=0, zy=0;
+        for (; i<maxIter; i++){
+          const xx = zx*zx - zy*zy;
+          const yy = 2*zx*zy;
+          zx = Math.abs(xx) + x0;
+          zy = yy + y0;
+          if (zx*zx + zy*zy > escape) break;
+        }
+        return i;
+      }
+
+      if (type==="spider") {
+        // Spider fractal: z_{n+1} = z_n^2 + c_n; c_{n+1} = (c_n + z_{n+1})/2
+        let zx=0, zy=0;
+        let cx=x0, cy=y0;
+        for (; i<maxIter; i++){
+          const zx2 = zx*zx - zy*zy + cx;
+          const zy2 = 2*zx*zy + cy;
+          zx=zx2; zy=zy2;
+          cx = (cx + zx)*0.5;
+          cy = (cy + zy)*0.5;
+          if (zx*zx + zy*zy > escape) break;
+        }
+        return i;
+      }
+
+      return i;
+    }
+
+    const grainAmt = 0.12 * S.lofi;
+    const hueBase = (t*0.06 + (S.keyRoot%12)/12) % 1;
+    const sat = clamp(0.55 + 0.35*dens + 0.20*S.fxChorus, 0, 1);
+
+    let idx = 0;
     for (let y=0; y<H; y++){
       const ny = (y/H - 0.5) * 2;
       for (let x=0; x<W; x++){
         const nx = (x/W - 0.5) * 2;
 
-        // rotate + scale
-        let zx = (nx*cosr - ny*sinr) / zoom;
-        let zy = (nx*sinr + ny*cosr) / zoom;
+        // rotate + scale + center shift
+        const rx = (nx*cosr - ny*sinr) / zoom + lerp(-0.1, 0.1, drift);
+        const ry = (nx*sinr + ny*cosr) / zoom + lerp(-0.05, 0.05, bright);
 
-        let i = 0;
-        for (; i<maxIter; i++){
-          // z = z^2 + c
-          const zx2 = zx*zx - zy*zy + a;
-          const zy2 = 2*zx*zy + b;
-          zx = zx2; zy = zy2;
-          if (zx*zx + zy*zy > escape) break;
-        }
+        const it = iterate(rx, ry);
+        const norm = it / maxIter;
 
-        // color
-        const norm = i / maxIter;
-        const hue = (t*0.08 + norm*0.9 + wow*0.1 + trebleVar*0.15) % 1;
-        const sat = clamp(0.65 + 0.30*dens + 0.15*trebleVar, 0, 1);
-        const val = clamp(0.15 + 0.85*Math.pow(1-norm, 0.55) * lerp(0.9, 1.05, 1-lofi), 0, 1);
+        const hue = (hueBase + norm*0.95 + 0.12*Math.sin(t*1.3 + rx*3 + ry*2)) % 1;
+        const val = clamp(0.08 + 0.92*Math.pow(1-norm, 0.52), 0, 1);
 
-        const [r,g,b2] = hsv2rgb(hue, sat, val);
+        const [r,g,b] = hsv2rgb(hue, sat, val);
+        const gr = (Math.random()-0.5)*grainAmt;
 
-        // subtle “grain” tied to lofi
-        const grain = (Math.random()-0.5) * 0.10 * lofi;
-
-        data[idx++] = clamp((r+grain)*255, 0, 255);
-        data[idx++] = clamp((g+grain)*255, 0, 255);
-        data[idx++] = clamp((b2+grain)*255, 0, 255);
+        data[idx++] = clamp((r+gr)*255, 0, 255);
+        data[idx++] = clamp((g+gr)*255, 0, 255);
+        data[idx++] = clamp((b+gr)*255, 0, 255);
         data[idx++] = 255;
       }
     }
     ctx.putImageData(img, 0, 0);
     requestAnimationFrame(renderFractal);
   }
+
+  // ---------- start/stop ----------
+  document.getElementById("start").onclick = async () => {
+    ensureAudio();
+    await ac.resume();
+    if (running) return;
+
+    running = true;
+    document.getElementById("start").disabled = true;
+    document.getElementById("stop").disabled = false;
+
+    // reset musical clocks
+    S.bar = 0; S.step = 0;
+    S.nextTime = ac.currentTime + 0.05;
+    S.drift={v:0,dv:0}; S.bright={v:0,dv:0}; S.wow={v:0,dv:0}; S.flutter={v:0,dv:0}; S.swingW={v:0,dv:0};
+    if (!S.phrase.length) regenPhrase();
+    S.phraseIdx = 0; S.phraseLastChangeBar = 0;
+
+    // ensure fractal loop is running
+    if (!lastRender) requestAnimationFrame(renderFractal);
+
+    timer = setInterval(scheduleAhead, 25);
+  };
+
+  document.getElementById("stop").onclick = () => {
+    if (!running) return;
+    running = false;
+    clearInterval(timer); timer=null;
+
+    const t = ac.currentTime;
+    masterG.gain.setTargetAtTime(0.0001, t, 0.12);
+    setTimeout(() => {
+      try { ac.suspend(); } catch {}
+      masterG.gain.setValueAtTime(S.master, ac.currentTime);
+    }, 380);
+
+    document.getElementById("start").disabled = false;
+    document.getElementById("stop").disabled = true;
+  };
+
+  document.getElementById("regen").onclick = () => {
+    regenPhrase();
+    S.phraseIdx = 0;
+  };
+
+  // ---------- bind UI ----------
+  bindRange("tempo","bpm",(v)=>String(Math.round(v)));
+  bindRange("master","master");
+  bindRange("swing","swing");
+  bindRange("dens","density");
+  bindRange("bass","bassEQ",(v)=>v.toFixed(1));
+  bindRange("treble","trebleEQ",(v)=>v.toFixed(1));
+  bindRange("lofi","lofi");
+  bindRange("stereo","stereo");
+  bindRange("fxDelay","fxDelay");
+  bindRange("fxReverb","fxReverb");
+  bindRange("fxChorus","fxChorus");
+  bindRange("fxDrive","fxDrive");
+  bindRange("wubRate","wubRate",(v)=>v.toFixed(2));
+  bindRange("wubDepth","wubDepth");
+  bindRange("mutate","mutate");
+  bindRange("keyDrift","keyDrift");
+  bindRange("phraseLen","phraseLen",(v)=>String(Math.round(v)));
+  bindRange("leadBusy","leadBusy");
+
+  bindRange("mixDrums","mixDrums");
+  bindRange("mixKick","mixKick");
+  bindRange("mixSnare","mixSnare");
+  bindRange("mixHats","mixHats");
+  bindRange("mixChords","mixChords");
+  bindRange("mixBass","mixBass");
+  bindRange("mixLead","mixLead");
+  bindRange("mixNoise","mixNoise");
+
+  bindCheck("enDrums","enDrums");
+  bindCheck("enChords","enChords");
+  bindCheck("enBass","enBass");
+  bindCheck("enLead","enLead");
+  bindCheck("autoKey","autoKey");
+  bindCheck("autoPhrase","autoPhrase");
+  bindCheck("grime","grime");
+  bindCheck("wub","wub");
+
+  bindSelect("fractalType","fractalType");
+  bindCheck("autoFractal","autoFractal");
+  bindCheck("hiRes","hiRes");
+
+  // fractal switch timestamp
+  document.getElementById("fractalType").addEventListener("change", ()=>{ lastFractalSwitch = nowMs(); });
+  document.getElementById("autoFractal").addEventListener("change", ()=>{ lastFractalSwitch = nowMs(); });
+
+  // init phrase + fractal
+  regenPhrase();
+  lastFractalSwitch = nowMs();
   requestAnimationFrame(renderFractal);
 
 })();
