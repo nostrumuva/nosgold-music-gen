@@ -1,2 +1,4 @@
 # nosgold-music-gen
-JavaScript music generator
+NOS-GOLD Music Generator
+
+This is a vibe-coded trippy JavaScript music generator.
